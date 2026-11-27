@@ -28,7 +28,10 @@ function renderPatients() {
   list.replaceChildren();
 
   // TODO 5: Select all patient elements from xmlDocument.
-  const patients = [];
+  const patients = xmlDocument.querySelectorAll("patient");
+  patients.forEach((patient) => {
+    const status = patient.getAttribute("status");
+
 
   patients.forEach((patient) => {
     const status = patient.getAttribute("status");
@@ -39,13 +42,17 @@ function renderPatients() {
     //If the filter is stable, skip critical patients.
     //he return skips only the current patient in the forEach() loop.
 
+    if (filter.value !== "all" && status !== filter.value) {
+      return;
+    }
+
     const card = document.createElement("article");
     card.className = "patient-card";
     card.dataset.status = status;
 
     const name = document.createElement("h3");
     // TODO 7: Read the name element and assign it with textContent.
-    name.textContent = "Patient name";
+     name.textContent = patient.querySelector("name, n").textContent;
 
     const details = document.createElement("p");
     const ward = patient.querySelector("ward").textContent;
