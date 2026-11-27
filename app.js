@@ -1,5 +1,6 @@
 const list = document.querySelector("#patient-list");
 const errorMessage = document.querySelector("#error-message");
+const filter = document.querySelector("#status-filter");
 
 let xmlDocument;
 
@@ -13,12 +14,10 @@ async function loadRegistry() {
 
     const xmlText = await response.text();
 
-    // TODO 3: Parse XML
     const parser = new DOMParser();
     xmlDocument = parser.parseFromString(
       xmlText, "application/xml"
     );
-    // TODO 4: Detect malformed XML
     const parseError = xmlDocument.querySelector("parsererror");
 
     if (parseError) {
@@ -45,13 +44,11 @@ function renderPatients() {
 
   if (!xmlDocument) return;
 
-  // TODO 5: Select all patient records
   const patients = xmlDocument.querySelectorAll("patient");
 
   patients.forEach((patient) => {
     const status = patient.getAttribute("status");
     const id = patient.getAttribute("id");
-    // TODO 6: Filter patients by status
     if (filter.value !== "all" && status !== filter.value) {
       return;
     }
@@ -60,7 +57,6 @@ function renderPatients() {
     card.className = "patient-card";
     card.dataset.status = status;
 
-    // TODO 7: Display patient name safely
     const heading = document.createElement("h3");
     heading.textContent =
       patient.querySelector("name").textContent;
