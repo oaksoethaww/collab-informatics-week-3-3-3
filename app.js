@@ -1,4 +1,3 @@
-const filter = document.querySelector("#status-filter");
 const list = document.querySelector("#patient-list");
 const errorMessage = document.querySelector("#error-message");
 
@@ -17,13 +16,10 @@ async function loadRegistry() {
     // TODO 3: Parse XML
     const parser = new DOMParser();
     xmlDocument = parser.parseFromString(
-      xmlText,
-      "application/xml"
+      xmlText, "application/xml"
     );
-
     // TODO 4: Detect malformed XML
-    const parseError =
-      xmlDocument.querySelector("parsererror");
+    const parseError = xmlDocument.querySelector("parsererror");
 
     if (parseError) {
       list.replaceChildren();
@@ -38,6 +34,7 @@ async function loadRegistry() {
     renderPatients();
 
   } catch (error) {
+    list.replaceChildren();
     errorMessage.hidden = false;
     errorMessage.textContent = error.message;
   }
@@ -49,18 +46,13 @@ function renderPatients() {
   if (!xmlDocument) return;
 
   // TODO 5: Select all patient records
-  const patients =
-    xmlDocument.querySelectorAll("patient");
+  const patients = xmlDocument.querySelectorAll("patient");
 
   patients.forEach((patient) => {
     const status = patient.getAttribute("status");
     const id = patient.getAttribute("id");
-
-    // TODO 6: Filter by status
-    if (
-      filter.value !== "all" &&
-      status !== filter.value
-    ) {
+    // TODO 6: Filter patients by status
+    if (filter.value !== "all" && status !== filter.value) {
       return;
     }
 
@@ -82,23 +74,18 @@ function renderPatients() {
 
     const ward = document.createElement("p");
     ward.textContent =
-      "Ward: " +
-      patient.querySelector("ward").textContent;
+      "Ward: " + patient.querySelector("ward").textContent;
 
     const condition = document.createElement("p");
     condition.textContent =
-      "Condition: " +
-      patient.querySelector("condition").textContent;
+      "Condition: " + patient.querySelector("condition").textContent;
 
-    const observation =
-      patient.querySelector("observation");
+    const observation = patient.querySelector("observation");
 
     const reading = document.createElement("p");
     reading.textContent =
-      observation.getAttribute("code") +
-      ": " +
-      observation.textContent +
-      " " +
+      observation.getAttribute("code") + ": " +
+      observation.textContent + " " +
       observation.getAttribute("unit");
 
     card.append(
