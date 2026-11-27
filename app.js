@@ -5,40 +5,62 @@ const errorMessage = document.querySelector("#error-message");
 let xmlDocument;
 
 async function loadRegistry() {
-  const response = await fetch("patients.xml");
-  const xmlText = await response.text();
+  try {
+    const response = await fetch("patients.xml");
 
-  // TODO 3: Create a DOMParser and parse xmlText as "application/xml".
-  const parser = newDOMParser;
-  xmlDocument = parser.parseFromString(xmlText,"application");
+    if (!response.ok) {
+      throw new Error("Cannot load patients.xml");
+    }
 
-  // TODO 4: Find the parsererror element. Show its text and stop if it exists.
-  const parseError = null;
-  if (parseError) {
+    const xmlText = await response.text();
+
+    // TODO 3: Parse XML
+    const parser = new DOMParser();
+    xmlDocument = parser.parseFromString(
+      xmlText,
+      "application/xml"
+    );
+
+    // TODO 4: Detect malformed XML
+    const parseError =
+      xmlDocument.querySelector("parsererror");
+
+    if (parseError) {
+      list.replaceChildren();
+      errorMessage.hidden = false;
+      errorMessage.textContent =
+        "XML error: " + parseError.textContent;
+      xmlDocument = null;
+      return;
+    }
+
+    errorMessage.hidden = true;
+    renderPatients();
+
+  } catch (error) {
     errorMessage.hidden = false;
-    errorMessage.textContent = "XML error: " + parseError.textContent;
-    return;
+    errorMessage.textContent = error.message;
   }
-
-  errorMessage.hidden = true;
-  renderPatients();
 }
 
 function renderPatients() {
   list.replaceChildren();
 
-  // TODO 5: Select all patient elements from xmlDocument.
-  const patients = xmlDocument.querySelectorAll("patient");
+  if (!xmlDocument) return;
+
+  // TODO 5: Select all patient records
+  const patients =
+    xmlDocument.querySelectorAll("patient");
+
   patients.forEach((patient) => {
     const status = patient.getAttribute("status");
+    const id = patient.getAttribute("id");
 
-    // TODO 6: Keep all patients when the filter is "all".
-    // Otherwise, skip patients whose status does not match the filter.
-    //The logic means: If the filter is all, do not skip anyone. If the filter is critical, skip stable patients.
-    //If the filter is stable, skip critical patients.
-    //he return skips only the current patient in the forEach() loop.
-
-    if (filter.value !== "all" && status !== filter.value) {
+    // TODO 6: Filter by status
+    if (
+      filter.value !== "all" &&
+      status !== filter.value
+    ) {
       return;
     }
 
@@ -46,28 +68,52 @@ function renderPatients() {
     card.className = "patient-card";
     card.dataset.status = status;
 
-    const name = document.createElement("h3");
+    // TODO 7: Display patient name safely
+    const heading = document.createElement("h3");
+    heading.textContent =
+      patient.querySelector("name").textContent;
 
-    // TODO 7: Read the name element and assign it with textContent.
-    name.textContent = patient.querySelector("name, n").textContent;
+    const badge = document.createElement("span");
+    badge.className = "status " + status;
+    badge.textContent = status;
 
-    const details = document.createElement("p");
-    const ward = patient.querySelector("ward").textContent;
-    const condition = patient.querySelector("condition").textContent;
-    details.textContent = `${ward}: ${condition}`;
+    const patientId = document.createElement("p");
+    patientId.textContent = "Patient ID: " + id;
 
-    const observation = patient.querySelector("observation");
+    const ward = document.createElement("p");
+    ward.textContent =
+      "Ward: " +
+      patient.querySelector("ward").textContent;
+
+    const condition = document.createElement("p");
+    condition.textContent =
+      "Condition: " +
+      patient.querySelector("condition").textContent;
+
+    const observation =
+      patient.querySelector("observation");
+
     const reading = document.createElement("p");
-    reading.textContent = `${observation.getAttribute("code")}: ${observation.textContent} ${observation.getAttribute("unit")}`;
+    reading.textContent =
+      observation.getAttribute("code") +
+      ": " +
+      observation.textContent +
+      " " +
+      observation.getAttribute("unit");
 
-    const statusText = document.createElement("span");
-    statusText.className = "status";
-    statusText.textContent = status;
+    card.append(
+      heading,
+      badge,
+      patientId,
+      ward,
+      condition,
+      reading
+    );
 
-    card.append(name, details, reading, statusText);
-    list.append(card);
+    list.appendChild(card);
   });
 }
 
 filter.addEventListener("change", renderPatients);
+
 loadRegistry();
