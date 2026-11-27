@@ -9,11 +9,11 @@ async function loadRegistry() {
   const xmlText = await response.text();
 
   // TODO 3: Create a DOMParser and parse xmlText as "application/xml".
-  const parser = null;
-  xmlDocument = null;
+  const parser = new DOMParser();
+  xmlDocument = parser.parseFromString(xmlText, "application/xml");
 
   // TODO 4: Find the parsererror element. Show its text and stop if it exists.
-  const parseError = null;
+  const parseError = xmlDocument.querySelector("parsererror");
   if (parseError) {
     errorMessage.hidden = false;
     errorMessage.textContent = "XML error: " + parseError.textContent;
